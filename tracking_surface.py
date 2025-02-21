@@ -1,50 +1,70 @@
 import os
-
-# import cv2
-# import matplotlib.pyplot as plt
 import numpy as np
-
 from edge_detection import detect_edges
 
-frame_folder = r"C:\Users\niloy\Desktop\Shots 02112025\20250211_083548"
 
-GAUSSIAN_BLUR_KERNEL = (5, 5)  # Kernel size for Gaussian blur
-CANNY_THRESHOLD1 = 10  # Lower threshold for Canny edge detection
-CANNY_THRESHOLD2 = 150  # Upper threshold for Canny edge detection
-GAMMA = 0.1  # Gamma correction factor (1.0 = no change)
-SPLINE_SMOOTHING = 1500  # Spline smoothing factor (higher = smoother, fewer details)
-INTERP_RESOLUTION = 200  # Number of interpolation points for spline
-LEVELS_ALPHA = 10  # Contrast scaling factor
-LEVELS_BETA = 2  # Brightness adjustment
+def process_frames(
+    frame_folder,
+    gaussian_blur_kernel=(5, 5),
+    canny_threshold1=10,
+    canny_threshold2=150,
+    gamma=0.1,
+    spline_smoothing=1500,
+    interp_resolution=200,
+    levels_alpha=10,
+    levels_beta=2,
+    save_edges=False,
+    save_path="edges.npy",
+):
+    """
+    Processes a sequence of frames for edge detection.
 
+    Parameters:
+        frame_folder (str): Path to the folder containing BMP frames.
+        gaussian_blur_kernel (tuple): Kernel size for Gaussian blur.
+        canny_threshold1 (int): Lower threshold for Canny edge detection.
+        canny_threshold2 (int): Upper threshold for Canny edge detection.
+        gamma (float): Gamma correction factor.
+        spline_smoothing (int): Spline smoothing factor.
+        interp_resolution (int): Number of interpolation points for spline.
+        levels_alpha (int): Contrast scaling factor.
+        levels_beta (int): Brightness adjustment.
+        save_edges (bool): Whether to save the edges array as a .npy file.
+        save_path (str): Path to save the .npy file if save_edges is True.
 
-# Get list of all .bmp files in the folder
-frames = [f for f in os.listdir(frame_folder) if f.lower().endswith(".bmp")]
+    Returns:
+        np.ndarray: The computed edges array.
+    """
+    frames = [f for f in os.listdir(frame_folder) if f.lower().endswith(".bmp")]
+    frames.sort()  # Ensure frames are processed in order
 
+    n = len(frames)
+    if n < 2:
+        raise ValueError("At least two frames are required for edge detection.")
 
-# Pre-allocate array for edge vs frames for speed
-n = len(frames)
-edges = np.full((2, INTERP_RESOLUTION, n - 1), np.nan)
+    edges = np.full((2, interp_resolution, n - 1), np.nan)
 
-# Print the list of .bmp files
-for i in range(n - 1):
-    FRAME1_PATH = os.path.join(frame_folder, frames[i])
-    FRAME2_PATH = os.path.join(frame_folder, frames[i + 1])
-    try:
-        edge = detect_edges(
-            FRAME1_PATH,
-            FRAME2_PATH,
-            GAMMA,
-            GAUSSIAN_BLUR_KERNEL,
-            LEVELS_ALPHA,
-            LEVELS_BETA,
-            CANNY_THRESHOLD1,
-            CANNY_THRESHOLD2,
-            SPLINE_SMOOTHING,
-            INTERP_RESOLUTION,
-        )
-        edges[:, :, i] = edge
-    except:
-        print(f"Frame {i} Didn't work")
+    for i in range(n - 1):
+        frame1_path = os.path.join(frame_folder, frames[i])
+        frame2_path = os.path.join(frame_folder, frames[i + 1])
+        try:
+            edge = detect_edges(
+                frame1_path,
+                frame2_path,
+                gamma,
+                gaussian_blur_kernel,
+                levels_alpha,
+                levels_beta,
+                canny_threshold1,
+                canny_threshold2,
+                spline_smoothing,
+                interp_resolution,
+            )
+            edges[:, :, i] = edge
+        except Exception as e:
+            print(f"Frame {i} processing failed: {e}")
 
-np.save("20250211_083548.npy", edges)
+    if save_edges:
+        np.save(save_path, edges)
+
+    return edges

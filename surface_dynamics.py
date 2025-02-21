@@ -1,31 +1,39 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-# Load the saved array
-edges = np.load("20250211_083548.npy")  # Ensure the file is in the same directory
 
-# Extract y-values (edges[1] contains y-values)
-y_values = edges[1, :, :]  # Shape: (200, time_frames)
+def plot_surface_dynamics(
+    npy_file, save_plot=True, plot_filename="surface_dynamics.png", scaling=1, FPS=1
+):
+    """
+    Plots the surface dynamics from a saved numpy array.
 
-# Compute the average y-value at each time frame
-avg_y = np.mean(y_values, axis=0)  # Shape: (time_frames,)
+    Parameters:
+        npy_file (str): Path to the saved numpy file containing edge data.
+        save_plot (bool): Whether to save the plot as an image file.
+        plot_filename (str): Name of the file to save the plot.
+    """
+    edges = np.load(npy_file)  # Load the saved array
+    y_values = edges[1, :, :] * scaling  # Extract y-values
+    avg_y = np.mean(y_values, axis=0)  # Compute average y-value per frame
+    time = np.arange(avg_y.shape[0]) / FPS  # Generate frame numbers
 
-# Generate frame numbers as x-axis
-frame_numbers = np.arange(avg_y.shape[0])
+    # Plotting parameters
+    plt.rc("text", usetex=True)
+    plt.rc("font", family="serif", size=14)
+    plt.rc("lines", linewidth=2)
+    plt.rc("axes", grid=True)
+    plt.rc("grid", linestyle="--")
 
-# Plot the results
-# Plotting parameters
-plt.rc("text", usetex=True)
-plt.rc("font", family="serif", size=14)
-plt.rc("lines", linewidth=2)
-plt.rc("axes", grid=True)
-plt.rc("grid", linestyle="--")
+    plt.figure(figsize=(10, 5))
+    plt.plot(time, avg_y, marker="o", linestyle="-", color="b", label="Avg Y")
+    plt.xlabel("Time")
+    plt.ylabel("Average Y Position")
+    plt.title(f"Average Y Position Over Time \n Shot {npy_file}")
+    plt.legend()
+    plt.grid(True)
 
-plt.figure(figsize=(10, 5))
-plt.plot(frame_numbers, avg_y, marker="o", linestyle="-", color="b", label="Avg Y")
-plt.xlabel("Frame Number")
-plt.ylabel("Average Y Position")
-plt.title(f"Average Y Position Over Time \n Shot {20250211_083548}")
-plt.legend()
-plt.grid(True)
-plt.savefig("20250211_083548.png", dpi=300, bbox_inches="tight")
+    if save_plot:
+        plt.savefig(plot_filename, dpi=300, bbox_inches="tight")
+    else:
+        plt.show()

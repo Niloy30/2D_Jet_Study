@@ -3,7 +3,7 @@ import numpy as np
 from scipy.interpolate import splev, splprep
 
 
-def preprocess_frame(image, gamma, blur_kernel, alpha, beta):
+def preprocess_frame(image, gamma=1, blur_kernel=(1, 1), alpha=1, beta=1):
     """
     Apply gamma correction, Gaussian blur, and levels adjustment.
     """
