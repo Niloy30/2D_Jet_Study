@@ -67,6 +67,8 @@ def detect_edges(
 
     # Interpolate spline
     x_smooth, y_smooth = splev(u_fine, tck)
+    # Flip the y-coordinates for Matplotlib
+    y_smooth = frame1.shape[0] - y_smooth
 
     edge = np.array([x_smooth, y_smooth])
     return edge

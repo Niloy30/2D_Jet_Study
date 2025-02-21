@@ -1,9 +1,8 @@
-# DEPRECATED. DON'T USE. Will delete after I'm done refering to it.
-
 import os
 
+# import cv2
+# import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 
 from edge_detection import detect_edges
 
@@ -25,7 +24,7 @@ frames = [f for f in os.listdir(frame_folder) if f.lower().endswith(".bmp")]
 
 # Pre-allocate array for edge vs frames for speed
 n = len(frames)
-edges = np.empty((n, 2, 200))
+edges = np.full((2, INTERP_RESOLUTION, n - 1), np.nan)
 
 # Print the list of .bmp files
 for i in range(n - 1):
@@ -44,12 +43,8 @@ for i in range(n - 1):
             SPLINE_SMOOTHING,
             INTERP_RESOLUTION,
         )
-        edges[i] = edge
-    # plt.plot(edge[0], edge[1], "b-", linewidth=2)  # Plot spline
-    # image = cv2.imread(FRAME1_PATH)
-    # plt.imshow(image)
-    # plt.title(f"Frame {i}")
-    # plt.pause(0.005)
-    # plt.clf()
+        edges[:, :, i] = edge
     except:
         print(f"Frame {i} Didn't work")
+
+np.save("20250211_083548.npy", edges)
