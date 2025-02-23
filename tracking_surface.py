@@ -65,6 +65,6 @@ def process_frames(
             print(f"Frame {i} processing failed: {e}")
 
     if save_edges:
-        np.save(save_path, edges)
+        np.save(rf"{save_path}\free_surface_data.npy", edges)
 
     return edges

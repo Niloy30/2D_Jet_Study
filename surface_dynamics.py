@@ -3,7 +3,13 @@ import numpy as np
 
 
 def plot_surface_dynamics(
-    npy_file, save_plot=True, plot_filename="surface_dynamics.png", scaling=1, FPS=1
+    experiment_number,
+    npy_file,
+    save_plot=True,
+    show_plot=False,
+    save_path="surface_dynamics.pdf",
+    scaling=1,
+    FPS=1,
 ):
     """
     Plots the surface dynamics from a saved numpy array.
@@ -22,18 +28,21 @@ def plot_surface_dynamics(
     plt.rc("text", usetex=True)
     plt.rc("font", family="serif", size=14)
     plt.rc("lines", linewidth=2)
-    plt.rc("axes", grid=True)
-    plt.rc("grid", linestyle="--")
+    plt.rc("axes", grid=False)
 
     plt.figure(figsize=(10, 5))
-    plt.plot(time, avg_y, marker="o", linestyle="-", color="b", label="Avg Y")
+    plt.plot(time, avg_y, marker=".", linestyle="--", color="b", label="Avg Y")
     plt.xlabel("Time")
     plt.ylabel("Average Y Position")
-    plt.title(f"Average Y Position Over Time \n Shot {npy_file}")
-    plt.legend()
+    plt.title(f"Shot {experiment_number}")
     plt.grid(True)
 
     if save_plot:
-        plt.savefig(plot_filename, dpi=300, bbox_inches="tight")
-    else:
+        plt.savefig(
+            rf"{save_path}\free_surface_plot.pdf",
+            dpi=300,
+            format="pdf",
+            bbox_inches="tight",
+        )
+    if show_plot:
         plt.show()
