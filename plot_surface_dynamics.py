@@ -28,7 +28,6 @@ def plot_surface_dynamics(
     plt.rc("text", usetex=True)
     plt.rc("font", family="serif", size=14)
     plt.rc("lines", linewidth=2)
-    plt.rc("axes", grid=False)
 
     plt.figure(figsize=(10, 5))
     plt.plot(time, avg_y, marker=".", linestyle="--", color="b", label="Avg Y")

@@ -1,5 +1,7 @@
 import os
+
 import numpy as np
+
 from edge_detection import detect_edges
 
 
@@ -38,13 +40,15 @@ def process_frames(
     frames = [f for f in os.listdir(frame_folder) if f.lower().endswith(".bmp")]
     frames.sort()  # Ensure frames are processed in order
 
-    n = len(frames)
-    if n < 2:
+    number_frames = len(frames)
+    if number_frames < 2:
         raise ValueError("At least two frames are required for edge detection.")
 
-    edges = np.full((2, interp_resolution, n - 1), np.nan)
+    edges = np.full((2, interp_resolution, number_frames - 1), np.nan)
 
-    for i in range(n - 1):
+    counter = 0
+
+    for i in range(number_frames - 1):
         frame1_path = os.path.join(frame_folder, frames[i])
         frame2_path = os.path.join(frame_folder, frames[i + 1])
         try:
@@ -60,9 +64,12 @@ def process_frames(
                 spline_smoothing,
                 interp_resolution,
             )
-            edges[:, :, i] = edge
+            edges[:, :, counter] = edge
+            counter += 1
         except Exception as e:
             print(f"Frame {i} processing failed: {e}")
+
+    edges = edges[:, :, 0:counter]
 
     if save_edges:
         np.save(rf"{save_path}\free_surface_data.npy", edges)
