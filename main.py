@@ -10,18 +10,19 @@ Description: Surface tracking using frame differencing.
 
 import os
 
-from obstacle_detection import detect_circles
+from free_surface_animation import create_free_surface_animation
 from plot_surface_dynamics import plot_surface_dynamics
 from tracking_surface import process_frames
 
 # %% Choose experiment
 
-experiment_number = "20250211_091130"
+experiment_number = "20250317_124335"
 conversion_factor = 20 / 100  # mm/pixel
+FPS = 7000
 
 # %% File Paths
 
-experiment_path = rf"C:\Users\niloy\Desktop\Shots 02112025\{experiment_number}"
+experiment_path = rf"C:\Users\niloy\Desktop\Experiments\03172025\{experiment_number}"
 
 
 results_path = rf"C:\Users\niloy\Google Drive\School Stuff\M.SC Mechanical Engineering\01 - Fluid Dynamics Lab\03 - PDA\01 - 2D Surface Perturbations\Results\{experiment_number}"
@@ -51,21 +52,21 @@ plot_surface_dynamics(
     show_plot=False,
     save_path=results_path,
     scaling=conversion_factor,
-    FPS=8000,
+    FPS=FPS,
 )
 
 # %%
-# create_free_surface_animation(
-#     npy_file,
-#     experiment_path,
-#     results_path,
-#     fps=20,
-#     show_animation=True,
-# )
-
-detect_circles(
-    experiment_path, save_obstacle_data=True, save_path=results_path, show=False
+create_free_surface_animation(
+    npy_file,
+    experiment_path,
+    results_path,
+    fps=20,
+    show_animation=True,
 )
+
+# detect_circles(
+#     experiment_path, save_obstacle_data=True, save_path=results_path, show=False
+# )
 
 print("Done")
 # %%
