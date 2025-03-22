@@ -1,6 +1,5 @@
 # %%
 import cv2
-import matplotlib.pyplot as plt
 import numpy as np
 
 
@@ -22,7 +21,7 @@ def get_transformation_matrix(image_path, pattern_size):
     center = (w // 2, h // 2)
     M_rot = cv2.getRotationMatrix2D(center, rotation_angle, 1.0)
 
-    return M_rot, (w, h), rotation_angle
+    return M_rot, (w, h), rotation_angle, corners
 
 
 def apply_transformation(image_path, M_rot, output_size):
@@ -43,24 +42,43 @@ def crop_image(img, crop_ratio=0.85):
     return cropped_img
 
 
-# Example usage
-image_with_grid = "Sample Frames/calibration_grid.bmp"
-new_image = "Sample Frames/shot_20250317_123839000229.bmp"
-pattern_size = (13, 18)
+def get_scaling(image_with_grid):
+    pattern_size = (13, 18)
+    M_rot, output_size, rotation_angle, corners = get_transformation_matrix(
+        image_with_grid, pattern_size
+    )
+    rotated_img = apply_transformation(image_with_grid, M_rot, output_size)
+    cropped_img = crop_image(rotated_img)
+    ret, corners = cv2.findChessboardCorners(cropped_img, (13, 15), None)
+    dist = (max(corners[:, :, 1]).item() - min(corners[:, :, 1]).item()) / 15
+    # print("Distance is", dist)
+    scaling = 5 / dist
+    return scaling
 
-M_rot, output_size, rotation_angle = get_transformation_matrix(
-    image_with_grid, pattern_size
-)
-rotated_img = apply_transformation(new_image, M_rot, output_size)
-cropped_img = crop_image(rotated_img)
 
-# Save and display result
-output_path = "corrected_image.bmp"
-cv2.imwrite(output_path, cropped_img)
+# # Example usage
+# image_with_grid = "Sample Frames/calibration_grid.bmp"
+# # new_image = "Sample Frames/shot_20250317_123839000229.bmp"
+# new_image = "Sample Frames/calibration_grid.bmp"
+# pattern_size = (13, 18)
 
-plt.imshow(cv2.cvtColor(cropped_img, cv2.COLOR_BGR2RGB))
-plt.axis("off")
-plt.title(f"Corrected & Cropped Image ({rotation_angle:.2f}°)")
-plt.show()
+# M_rot, output_size, rotation_angle, corners = get_transformation_matrix(
+#     image_with_grid, pattern_size
+# )
+# rotated_img = apply_transformation(new_image, M_rot, output_size)
+# cropped_img = crop_image(rotated_img)
 
-# %%
+# # Save and display result
+# output_path = "corrected_image.bmp"
+# cv2.imwrite(output_path, cropped_img)
+
+# plt.imshow(cv2.cvtColor(cropped_img, cv2.COLOR_BGR2RGB))
+# plt.axis("off")
+# plt.title(f"Corrected & Cropped Image ({rotation_angle:.2f}°)")
+# plt.show()
+# # %%
+# ret, corners = cv2.findChessboardCorners(cropped_img, (13, 15), None)
+# plt.scatter(corners[:, :, 0], corners[:, :, 1], marker=".")
+# plt.show()
+
+# # %%

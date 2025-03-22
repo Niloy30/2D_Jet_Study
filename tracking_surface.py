@@ -7,6 +7,9 @@ from edge_detection import detect_edges
 
 def process_frames(
     frame_folder,
+    M_rot,
+    output_size,
+    rotation_angle,
     gaussian_blur_kernel=(5, 5),
     canny_threshold1=10,
     canny_threshold2=150,
@@ -63,11 +66,15 @@ def process_frames(
                 canny_threshold2,
                 spline_smoothing,
                 interp_resolution,
+                M_rot,
+                output_size,
+                rotation_angle,
             )
             edges[:, :, counter] = edge
             counter += 1
         except Exception as e:
-            print(f"Frame {i} processing failed: {e}")
+            pass
+            # print(f"Frame {i} processing failed: {e}")
 
     edges = edges[:, :, 0:counter]
 

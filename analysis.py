@@ -1,59 +1,80 @@
-# %% Import Packages
-
-import matplotlib.pyplot as plt
+# %%
 import numpy as np
-from matplotlib.patches import Circle
+import matplotlib.pyplot as plt
+from calibration import get_scaling
+from scipy.interpolate import CubicSpline
+from scipy.optimize import curve_fit
+from scipy.signal import savgol_filter
+from scipy.fftpack import fft, ifft, fftfreq
 
 
-# %% Choose parameters
-plot_frame = True
-frame_number = 1
-experiment_number = "20250211_083548"
-
-# %% File Paths
-
-experiment_path = rf"E:\FDL\2D Jet Study Experiments\2025-02-11\{experiment_number}"
-
-
+calibration_grid = (
+    r"E:\FDL\2D Jet Study Experiments\2025-03-17\192.168.0.10_C001H001S0004.bmp"
+)
+conversion_factor = get_scaling(calibration_grid)  # mm/pixel
+# %%
+experiment_number = "20250317_124335"
+experiment_path = rf"E:\FDL\2D Jet Study Experiments\2025-03-17\{experiment_number}"
 results_path = rf"C:\Users\niloy\Google Drive\School Stuff\M.SC Mechanical Engineering\01 - Fluid Dynamics Lab\03 - PDA\01 - 2D Surface Perturbations\Results\{experiment_number}"
-
-obstacle_path = rf"{results_path}\obstacle_data.npy"
 free_surface_data = rf"{results_path}\free_surface_data.npy"
 
-# %% Load Data
 
-obstacle = np.load(obstacle_path)  # Load the saved array
 free_surface_all = np.load(free_surface_data)
 
 
-# Get Obstacle values (only for single obstacle)
-x = obstacle[0][0][0]  # Convert to scalar
-y = obstacle[0][0][1]  # Convert to scalar
-R = obstacle[0][0][2]  # Convert to scalar
+X = free_surface_all[0, :, :]
+Y = free_surface_all[1, :, :]
+T = np.arange(0, X.shape[1], 1)
 
-# %% Plotting a frame
+Y_average = np.mean(Y, axis=0)
 
-if plot_frame:
-
-    free_surface = free_surface_all[:, :, frame_number]
-
-    fig, ax = plt.subplots()
-    ax.plot(free_surface[0], free_surface[1], "b")
-
-    # Create and add the circle patch
-    circle = Circle((x, y), R, color="k", fill=True)
-    ax.plot(x, y, "xr")
-    ax.add_patch(circle)
-
-    ax.set_ylim(0, 320)
-    ax.set_xlim(0, 512)
-    ax.set_aspect("equal")  # Ensure the circle isn't distorted
-
-    plt.show()
+Y_average_m = (Y_average - np.min(Y_average)) * conversion_factor / 1000
+T_s = T / 7000
+initial_frame_number = np.argmin(Y_average)
 
 # %%
-initial_free_surface = free_surface = free_surface_all[:, :, 0]
-H0 = initial_free_surface[1, 0]
-r = R / H0
+# Plotting parameters
+plt.rc("text", usetex=True)
+plt.rc("font", family="serif", size=14)
+plt.rc("lines", linewidth=2)
+plt.rc("axes", grid=False)
+
+plt.plot(T_s, Y_average_m, ".")
+# %%
+t = T_s
+y = Y_average_m
+y_vs_t = CubicSpline(t, y)  # Fit cubic spline to (t, y)
+U_vs_t = y_vs_t.derivative()(t)  # Evaluate derivative at t points
+a_vs_t = y_vs_t.derivative(2)(t)  # Evaluate derivative at t points
+
+y_vs_t = CubicSpline(t, y)  # Fit cubic spline to (t, y)
+
+coeffs = np.polyfit(t, y, 2)  # Returns [a, b, c] for ax² + bx + c
+quadratic_fit = np.poly1d(coeffs)  # Convert to a polynomial function
+
+# Generate smooth x values for plotting
+t_quad = np.linspace(min(t), max(t), 100)
+y_quad = quadratic_fit(t_quad)
+
+plt.figure(figsize=(10, 5))
+plt.plot(t, y, marker=".", linestyle="--", color="b", label="Raw Data")
+plt.plot(t, y_vs_t(t), "r", label="Cubic Spline")
+plt.plot(
+    t_quad,
+    y_quad,
+    label=f"Quadratic Fit: {coeffs[0]:.2f}x² + {coeffs[1]:.2f}x + {coeffs[2]:.2f}",
+    color="green",
+)
+plt.xlabel("$t$ [-]")
+plt.ylabel("$y$ ")
+plt.title(f"Shot {experiment_number}")
+plt.legend()
+plt.grid()
 
 # %%
+a = coeffs[0] * 2
+g = 9.81
+
+L = 2 + g / a
+
+print(L)

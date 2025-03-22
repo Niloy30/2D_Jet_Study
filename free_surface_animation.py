@@ -4,6 +4,7 @@ import cv2
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import numpy as np
+from tqdm import tqdm  # Import tqdm for progress bar
 
 
 def create_free_surface_animation(
@@ -14,9 +15,9 @@ def create_free_surface_animation(
 
     :param edges_file: Path to the .npy file containing edge data.
     :param experiment_path: Path to the directory containing multiple experiment folders.
-    :param experiment_number: The specific experiment folder (as a string or number).
     :param save_path: Directory where the output GIF will be saved.
     :param fps: Frames per second for the animation.
+    :param show_animation: If True, display the animation after saving.
     """
 
     # Construct the experiment folder path
@@ -28,17 +29,16 @@ def create_free_surface_animation(
         )
 
     # Ensure save directory exists
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
+    os.makedirs(save_path, exist_ok=True)
 
     # Load the saved edges array
     edges = np.load(edges_file)
 
     # Get list of frame paths
-    frames = [f for f in os.listdir(experiment_folder) if f.lower().endswith(".bmp")]
-    frame_paths = [
-        os.path.join(experiment_folder, f) for f in sorted(frames)
-    ]  # Sort to ensure correct order
+    frames = sorted(
+        f for f in os.listdir(experiment_folder) if f.lower().endswith(".bmp")
+    )
+    frame_paths = [os.path.join(experiment_folder, f) for f in frames]
 
     if not frame_paths:
         raise FileNotFoundError(f"No BMP frames found in '{experiment_folder}'.")
@@ -52,9 +52,7 @@ def create_free_surface_animation(
 
     # Display the first frame to initialize the plot
     img = cv2.imread(frame_paths[0])
-    img = cv2.cvtColor(
-        img, cv2.COLOR_BGR2RGB
-    )  # Convert BGR to RGB for correct coloring
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # Convert BGR to RGB
     image_display = ax.imshow(img)
 
     # Initialize the spline plot
@@ -86,9 +84,10 @@ def create_free_surface_animation(
         ax.set_title(f"Frame {i}")
         return image_display, spline_plot
 
-    # Create animation
+    # Create animation with tqdm for progress
+    print("Generating animation...")
     ani = animation.FuncAnimation(
-        fig, update, frames=len(frame_paths) - 1, interval=1000 / fps
+        fig, update, frames=tqdm(range(len(frame_paths) - 1)), interval=1000 / fps
     )
 
     # Define output file path
@@ -97,12 +96,12 @@ def create_free_surface_animation(
     # Save animation as a .gif file
     ani.save(output_gif, writer="pillow", fps=fps)
 
+    print(f"Animation saved at: {output_gif}")
+
     # Show animation
     if show_animation:
         plt.show()
 
-    # print(f"Animation saved at: {output_gif}")
-
 
 # Example usage:
-# create_free_surface_animation("free_surface_data.npy", "C:/Users/niloy/Experiments", "002", "C:/Users/niloy/Animations")
+# create_free_surface_animation("free_surface_data.npy", "C:/Users/niloy/Experiments", "C:/Users/niloy/Animations")

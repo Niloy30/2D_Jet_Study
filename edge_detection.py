@@ -2,6 +2,8 @@ import cv2
 import numpy as np
 from scipy.interpolate import splev, splprep
 
+from calibration import crop_image
+
 
 def preprocess_frame(image, gamma=1, blur_kernel=(1, 1), alpha=1, beta=1):
     """
@@ -34,6 +36,9 @@ def detect_edges(
     canny_threshold2,
     spline_smoothing,
     interp_resolution,
+    M_rot,
+    output_size,
+    rotation_angle,
 ):
     """
     Perform edge detection and return the spline interpolated edge points.
@@ -41,6 +46,12 @@ def detect_edges(
     # Load and preprocess frames
     frame1 = cv2.imread(frame1_path, cv2.IMREAD_GRAYSCALE)
     frame2 = cv2.imread(frame2_path, cv2.IMREAD_GRAYSCALE)
+
+    frame1 = cv2.warpAffine(frame1, M_rot, output_size)
+    frame2 = cv2.warpAffine(frame2, M_rot, output_size)
+
+    frame1 = crop_image(frame1)
+    frame2 = crop_image(frame2)
 
     f1_processed = preprocess_frame(frame1, gamma, blur_kernel, alpha, beta)
     f2_processed = preprocess_frame(frame2, gamma, blur_kernel, alpha, beta)
