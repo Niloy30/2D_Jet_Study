@@ -10,7 +10,7 @@ from calibration import get_scaling
 
 # Define global constants
 calibration_grid = (
-    r"C:\Users\niloy\Desktop\Experiments\03242025\192.168.0.10_C001H001S0001.bmp"
+    r"E:\FDL\2D Jet Study Experiments\04072025\192.168.0.10_C001H001S0003.png"
 )
 conversion_factor = get_scaling(calibration_grid)  # mm/pixel
 results_dir = r"C:\Users\niloy\Google Drive\School Stuff\M.SC Mechanical Engineering\01 - Fluid Dynamics Lab\03 - PDA\01 - 2D Surface Perturbations\Results"
@@ -37,7 +37,7 @@ def process_experiment(experiment_number, conversion_factor, progress_queue):
         coeffs = np.polyfit(T_s, Y_average_m, 2)
         a = coeffs[0] * 2
         g = 9.81
-        Lambda = 2 + g / a
+        Lambda = 2 * (1 + g / a)
 
         # Update progress
         progress_queue.put(1)

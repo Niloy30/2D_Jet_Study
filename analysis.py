@@ -6,12 +6,12 @@ from scipy.interpolate import CubicSpline
 from calibration import get_scaling
 
 calibration_grid = (
-    r"C:\Users\niloy\Desktop\Experiments\03312025\192.168.0.10_C001H001S0002.png"
+    r"E:\FDL\2D Jet Study Experiments\04072025\192.168.0.10_C001H001S0003.png"
 )
 conversion_factor = get_scaling(calibration_grid, (11, 10))  # mm/pixel
 # %%
-experiment_number = "20250407_083123"
-experiment_path = rf"C:\Users\niloy\Desktop\Experiments\04072025\{experiment_number}"
+experiment_number = "20250407_105735"
+experiment_path = rf"E:\FDL\2D Jet Study Experiments\04072025\{experiment_number}"
 results_path = rf"C:\Users\niloy\Google Drive\School Stuff\M.SC Mechanical Engineering\01 - Fluid Dynamics Lab\03 - PDA\01 - 2D Surface Perturbations\Results\{experiment_number}"
 free_surface_data = rf"{results_path}\free_surface_data.npy"
 
@@ -47,6 +47,7 @@ a_vs_t = y_vs_t.derivative(2)(t)  # Evaluate derivative at t points
 y_vs_t = CubicSpline(t, y)  # Fit cubic spline to (t, y)
 
 coeffs = np.polyfit(t, y, 2)  # Returns [a, b, c] for ax² + bx + c
+print(coeffs)
 quadratic_fit = np.poly1d(coeffs)  # Convert to a polynomial function
 
 # Generate smooth x values for plotting
@@ -67,6 +68,7 @@ plt.ylabel("$y$ ")
 plt.title(f"Shot {experiment_number}")
 plt.legend()
 plt.grid()
+plt.show()
 
 # %%
 a = coeffs[0] * 2
