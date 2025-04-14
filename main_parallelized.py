@@ -8,23 +8,25 @@ Description: Parallelized surface tracking using frame differencing.
 
 # %% Package Imports
 
-import os
 import multiprocessing
+import os
+
 from calibration import get_scaling, get_transformation_matrix
 from plot_surface_dynamics import plot_surface_dynamics
 from tracking_surface import process_frames
 
 # %% Constants
 
-BASE_EXPERIMENT_DIR = r"E:\FDL\2D Jet Study Experiments\2025-03-17"
+BASE_EXPERIMENT_DIR = r"C:\Users\niloy\Desktop\Experiments\04072025"
 RESULTS_BASE_DIR = r"C:\Users\niloy\Google Drive\School Stuff\M.SC Mechanical Engineering\01 - Fluid Dynamics Lab\03 - PDA\01 - 2D Surface Perturbations\Results"
 CALIBRATION_GRID = (
-    r"E:\FDL\2D Jet Study Experiments\2025-03-17\192.168.0.10_C001H001S0004.bmp"
+    r"C:\Users\niloy\Desktop\Experiments\04072025\192.168.0.10_C001H001S0003.png"
 )
 FPS = 7000
 
 # Get scaling factor from calibration grid
-conversion_factor = get_scaling("Sample Frames/calibration_grid.bmp")  # mm/pixel
+pattern_size = (11, 10)
+conversion_factor = get_scaling(CALIBRATION_GRID, pattern_size)  # mm/pixel
 
 
 def process_experiment(experiment_number):
@@ -43,7 +45,7 @@ def process_experiment(experiment_number):
 
     # Get transformation matrix
     M_rot, output_size, rotation_angle, corners = get_transformation_matrix(
-        CALIBRATION_GRID, (13, 18)
+        CALIBRATION_GRID, pattern_size
     )
 
     # Track the free surface

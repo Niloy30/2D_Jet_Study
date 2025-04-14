@@ -5,17 +5,18 @@ import numpy as np
 
 def get_transformation_matrix(image_path, pattern_size):
     """Detects a checkerboard grid and returns the rotation transformation matrix."""
-    img = cv2.imread(image_path)
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
 
-    ret, corners = cv2.findChessboardCorners(gray, pattern_size, None)
+    ret, corners = cv2.findChessboardCorners(img, pattern_size, None)
     if not ret:
         raise ValueError("Checkerboard not detected.")
 
     corners = corners.reshape(-1, 2)
     pt1, pt2 = corners[0], corners[1]
     dx, dy = pt2[0] - pt1[0], pt2[1] - pt1[1]
-    rotation_angle = np.degrees(np.arctan2(dy, dx))  # Negate to correct orientation
+    rotation_angle = min(
+        np.degrees(np.arctan2(dy, dx)), 180 - np.degrees(np.arctan2(dy, dx))
+    )
 
     h, w = img.shape[:2]
     center = (w // 2, h // 2)
@@ -42,15 +43,17 @@ def crop_image(img, crop_ratio=0.85):
     return cropped_img
 
 
-def get_scaling(image_with_grid):
-    pattern_size = (13, 18)
+def get_scaling(image_with_grid, pattern_size):
+    # pattern_size = (13, 12)
     M_rot, output_size, rotation_angle, corners = get_transformation_matrix(
         image_with_grid, pattern_size
     )
     rotated_img = apply_transformation(image_with_grid, M_rot, output_size)
     cropped_img = crop_image(rotated_img)
-    ret, corners = cv2.findChessboardCorners(cropped_img, (13, 15), None)
-    dist = (max(corners[:, :, 1]).item() - min(corners[:, :, 1]).item()) / 15
+    ret, corners = cv2.findChessboardCorners(cropped_img, pattern_size, None)
+    dist = (max(corners[:, :, 1]).item() - min(corners[:, :, 1]).item()) / pattern_size[
+        1
+    ]
     # print("Distance is", dist)
     scaling = 5 / dist
     return scaling

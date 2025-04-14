@@ -16,17 +16,17 @@ from tracking_surface import process_frames
 
 # %% Choose experiment
 
-experiment_number = "20250317_110024"
+experiment_number = "20250407_083123"
 
 FPS = 7000
 
 # %% File Paths
 
 calibration_grid = (
-    r"E:\FDL\2D Jet Study Experiments\2025-03-17\192.168.0.10_C001H001S0004.bmp"
+    r"C:\Users\niloy\Desktop\Experiments\04072025\192.168.0.10_C001H001S0003.png"
 )
 
-experiment_path = rf"E:\FDL\2D Jet Study Experiments\2025-03-17\{experiment_number}"
+experiment_path = rf"C:\Users\niloy\Desktop\Experiments\04072025\{experiment_number}"
 
 
 results_path = rf"C:\Users\niloy\Google Drive\School Stuff\M.SC Mechanical Engineering\01 - Fluid Dynamics Lab\03 - PDA\01 - 2D Surface Perturbations\Results\{experiment_number}"
@@ -39,11 +39,11 @@ if not os.path.exists(results_path):
 
 print("Starting Main Processes")
 
-
-conversion_factor = get_scaling(calibration_grid)  # mm/pixel
-
+pattern_size = (11, 10)
+conversion_factor = get_scaling(calibration_grid, pattern_size)  # mm/pixel
+# add in a line to save the conversion factor so I don't have to redo it again during analysis
 M_rot, output_size, rotation_angle, corners = get_transformation_matrix(
-    calibration_grid, (13, 18)
+    calibration_grid, pattern_size
 )
 
 edges = process_frames(

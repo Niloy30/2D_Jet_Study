@@ -10,7 +10,7 @@ from calibration import get_scaling
 
 # Define global constants
 calibration_grid = (
-    r"E:\FDL\2D Jet Study Experiments\2025-03-17\192.168.0.10_C001H001S0004.bmp"
+    r"C:\Users\niloy\Desktop\Experiments\03242025\192.168.0.10_C001H001S0001.bmp"
 )
 conversion_factor = get_scaling(calibration_grid)  # mm/pixel
 results_dir = r"C:\Users\niloy\Google Drive\School Stuff\M.SC Mechanical Engineering\01 - Fluid Dynamics Lab\03 - PDA\01 - 2D Surface Perturbations\Results"
