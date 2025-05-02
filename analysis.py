@@ -5,10 +5,8 @@ from scipy.interpolate import CubicSpline
 
 from calibration import get_scaling
 
-calibration_grid = (
-    r"E:\FDL\2D Jet Study Experiments\04072025\192.168.0.10_C001H001S0003.png"
-)
-conversion_factor = get_scaling(calibration_grid, (11, 10))  # mm/pixel
+calibration_grid = r"C:\Users\niloy\Desktop\Experiments\192.168.0.10_C001H001S0004.bmp"
+conversion_factor = get_scaling(calibration_grid, (9, 10))  # mm/pixel
 # %%
 experiment_number = "20250407_105735"
 experiment_path = rf"E:\FDL\2D Jet Study Experiments\04072025\{experiment_number}"

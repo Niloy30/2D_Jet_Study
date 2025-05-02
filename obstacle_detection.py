@@ -3,6 +3,8 @@ import os
 import cv2
 import numpy as np
 
+from calibration import crop_image
+
 
 def detect_circles(
     experiment_path, save_obstacle_data=True, save_path=None, show=False
@@ -29,6 +31,7 @@ def detect_circles(
 
     # Load the image
     image = cv2.imread(image_path)
+    image = crop_image(image)
     if image is None:
         raise FileNotFoundError(f"Could not load image at path: {image_path}")
 
@@ -46,8 +49,8 @@ def detect_circles(
         minDist=50,
         param1=50,
         param2=30,
-        minRadius=20,
-        maxRadius=100,
+        minRadius=60,
+        maxRadius=70,
     )
 
     # Convert OpenCV coordinates to Matplotlib's coordinate system
@@ -87,5 +90,10 @@ def detect_circles(
 
 
 # Example usage
-# circles = detect_circles("./Sample Frames", save_obstacle_data=True, save_path="./Results")
+# circles = detect_circles(
+#     r"C:\Users\niloy\Desktop\Experiments\04162025",
+#     save_obstacle_data=False,
+#     save_path="./Results",
+#     show=True,
+# )
 # print(circles)

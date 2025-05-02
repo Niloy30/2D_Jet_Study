@@ -11,25 +11,27 @@ Description: Surface tracking using frame differencing.
 import os
 
 from calibration import get_scaling, get_transformation_matrix
+from free_surface_animation import create_free_surface_animation
 from plot_surface_dynamics import plot_surface_dynamics
 from tracking_surface import process_frames
 
 # %% Choose experiment
 
-experiment_number = "20250407_083123"
+experiment_number = "20250430_125933"
 
 FPS = 7000
 
 # %% File Paths
 
 calibration_grid = (
-    r"C:\Users\niloy\Desktop\Experiments\04072025\192.168.0.10_C001H001S0003.png"
+    r"C:\Users\niloy\Desktop\Experiments\04302025\192.168.0.10_C001H001S0004.bmp"
 )
 
-experiment_path = rf"C:\Users\niloy\Desktop\Experiments\04072025\{experiment_number}"
+
+experiment_path = rf"C:\Users\niloy\Desktop\Experiments\04302025\{experiment_number}"
 
 
-results_path = rf"C:\Users\niloy\Google Drive\School Stuff\M.SC Mechanical Engineering\01 - Fluid Dynamics Lab\03 - PDA\01 - 2D Surface Perturbations\Results\{experiment_number}"
+results_path = rf"C:\Users\niloy\Google Drive\School Stuff\M.SC Mechanical Engineering\01 - Fluid Dynamics Lab\03 - PDA\01 - 2D Surface Perturbations\Results\debugging\{experiment_number}"
 
 if not os.path.exists(results_path):
     os.makedirs(results_path)
@@ -39,7 +41,7 @@ if not os.path.exists(results_path):
 
 print("Starting Main Processes")
 
-pattern_size = (11, 10)
+pattern_size = (9, 10)
 conversion_factor = get_scaling(calibration_grid, pattern_size)  # mm/pixel
 # add in a line to save the conversion factor so I don't have to redo it again during analysis
 M_rot, output_size, rotation_angle, corners = get_transformation_matrix(
@@ -69,14 +71,14 @@ plot_surface_dynamics(
     FPS=FPS,
 )
 
-# # %% broken right now
-# create_free_surface_animation(
-#     npy_file,
-#     experiment_path,
-#     results_path,
-#     fps=20,
-#     show_animation=True,
-# )
+# %% broken right now
+create_free_surface_animation(
+    npy_file,
+    experiment_path,
+    results_path,
+    fps=20,
+    show_animation=True,
+)
 
 # detect_circles(
 #     experiment_path, save_obstacle_data=True, save_path=results_path, show=False

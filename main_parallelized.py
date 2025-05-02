@@ -11,21 +11,23 @@ Description: Parallelized surface tracking using frame differencing.
 import multiprocessing
 import os
 
+import numpy as np
+
 from calibration import get_scaling, get_transformation_matrix
 from plot_surface_dynamics import plot_surface_dynamics
 from tracking_surface import process_frames
 
 # %% Constants
 
-BASE_EXPERIMENT_DIR = r"C:\Users\niloy\Desktop\Experiments\04072025"
+BASE_EXPERIMENT_DIR = r"C:\Users\niloy\Desktop\Experiments\04302025"
 RESULTS_BASE_DIR = r"C:\Users\niloy\Google Drive\School Stuff\M.SC Mechanical Engineering\01 - Fluid Dynamics Lab\03 - PDA\01 - 2D Surface Perturbations\Results"
 CALIBRATION_GRID = (
-    r"C:\Users\niloy\Desktop\Experiments\04072025\192.168.0.10_C001H001S0003.png"
+    r"C:\Users\niloy\Desktop\Experiments\04302025\192.168.0.10_C001H001S0004.bmp"
 )
 FPS = 7000
 
 # Get scaling factor from calibration grid
-pattern_size = (11, 10)
+pattern_size = (9, 10)
 conversion_factor = get_scaling(CALIBRATION_GRID, pattern_size)  # mm/pixel
 
 
@@ -37,9 +39,10 @@ def process_experiment(experiment_number):
     """
     experiment_path = os.path.join(BASE_EXPERIMENT_DIR, experiment_number)
     results_path = os.path.join(RESULTS_BASE_DIR, experiment_number)
-
+    
     # Ensure results directory exists
     os.makedirs(results_path, exist_ok=True)
+    np.save(rf"{results_path}\conversion_factor.npy", conversion_factor)
 
     print(f"Processing {experiment_number}...")
 

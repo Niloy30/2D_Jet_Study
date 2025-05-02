@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm  # Import tqdm for progress bar
 
+from calibration import crop_image
+
 
 def create_free_surface_animation(
     edges_file, experiment_path, save_path, fps=20, show_animation=False
@@ -45,6 +47,7 @@ def create_free_surface_animation(
 
     # Load the first frame to get its height
     sample_img = cv2.imread(frame_paths[0], cv2.IMREAD_GRAYSCALE)
+    sample_img = crop_image(sample_img)
     image_height = sample_img.shape[0]  # Height of the image
 
     # Set up the figure and axis
@@ -53,6 +56,7 @@ def create_free_surface_animation(
     # Display the first frame to initialize the plot
     img = cv2.imread(frame_paths[0])
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # Convert BGR to RGB
+    img = crop_image(img)
     image_display = ax.imshow(img)
 
     # Initialize the spline plot
@@ -68,6 +72,7 @@ def create_free_surface_animation(
     def update(i):
         img = cv2.imread(frame_paths[i])
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        img = crop_image(img)
         image_display.set_data(img)  # Update background image
 
         x = edges[0, :, i]

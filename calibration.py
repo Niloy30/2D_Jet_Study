@@ -32,7 +32,7 @@ def apply_transformation(image_path, M_rot, output_size):
     return corrected_img
 
 
-def crop_image(img, crop_ratio=0.85):
+def crop_image(img, crop_ratio=0.95):
     """Crops the inner portion of the image based on the given crop ratio."""
     h, w = img.shape[:2]
     crop_margin_w = int(w * (1 - crop_ratio) / 2)
@@ -44,13 +44,12 @@ def crop_image(img, crop_ratio=0.85):
 
 
 def get_scaling(image_with_grid, pattern_size):
-    # pattern_size = (13, 12)
     M_rot, output_size, rotation_angle, corners = get_transformation_matrix(
         image_with_grid, pattern_size
     )
     rotated_img = apply_transformation(image_with_grid, M_rot, output_size)
-    cropped_img = crop_image(rotated_img)
-    ret, corners = cv2.findChessboardCorners(cropped_img, pattern_size, None)
+    #cropped_img = crop_image(rotated_img)
+    ret, corners = cv2.findChessboardCorners(rotated_img, pattern_size, None)
     dist = (max(corners[:, :, 1]).item() - min(corners[:, :, 1]).item()) / pattern_size[
         1
     ]
