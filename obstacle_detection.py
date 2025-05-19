@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 
 from calibration import crop_image
+from manual_obstacle_detection import run_manual_circle_detection
 
 
 def detect_circles(
@@ -31,7 +32,7 @@ def detect_circles(
 
     # Load the image
     image = cv2.imread(image_path)
-    image = crop_image(image)
+    #image = crop_image(image)
     if image is None:
         raise FileNotFoundError(f"Could not load image at path: {image_path}")
 
@@ -54,6 +55,9 @@ def detect_circles(
     )
 
     # Convert OpenCV coordinates to Matplotlib's coordinate system
+    if circles is None:
+        run_manual_circle_detection()
+
     if circles is not None:
         circles = np.uint16(
             np.around(circles)
@@ -77,7 +81,15 @@ def detect_circles(
 
     # Save detected circles and overlayed image if requested
     if save_obstacle_data and save_path:
-        np.save(os.path.join(save_path, "obstacle_data.npy"), circles)
+    # Flatten the (1, N, 3) shape to (N, 3)
+        if circles is not None:
+            np.savetxt(
+                os.path.join(save_path, "obstacle_data.txt"),
+                circles.reshape(-1, 3),
+                fmt="%.2f",
+                header="x y radius"
+            )
+
         cv2.imwrite(os.path.join(save_path, "obstacle.png"), image)
 
     # Display the result
@@ -89,9 +101,9 @@ def detect_circles(
     return circles[0] if circles is not None else None
 
 
-# Example usage
+# #Example usage
 # circles = detect_circles(
-#     r"C:\Users\niloy\Desktop\Experiments\04162025",
+#     r"C:\Users\niloy\Desktop\Experiments\04302025",
 #     save_obstacle_data=False,
 #     save_path="./Results",
 #     show=True,

@@ -1,87 +1,35 @@
-# %%
+import cv2
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.interpolate import griddata
 
-# Given data
-pressure = np.array(
-    [
-        100,
-        100,
-        100,
-        100,
-        200,
-        200,
-        200,
-        200,
-        300,
-        300,
-        300,
-        300,
-        147.5,
-        148.6,
-        149.4,
-        149.8,
-        250.9,
-        247.1,
-        253.0,
-        251.3,
-    ]
-)
 
-fill_height = np.array(
-    [0, 10, 20, 30, 0, 10, 20, 30, 0, 10, 20, 30, 0, 10, 20, 30, 0, 10, 30, 20]
-)
-a_star = np.array(
-    [
-        2.526260366,
-        2.522390046,
-        2.569854359,
-        2.526462488,
-        2.222829655,
-        2.217011251,
-        2.240027843,
-        2.243527927,
-        2.146130797,
-        2.155889174,
-        2.165263892,
-        2.172467716,
-        2.28703174,
-        2.270299534,
-        2.274993977,
-        2.298420286,
-        2.169357162,
-        2.171387105,
-        2.187002362,
-        2.191428411,
-    ]
-)
+def mask_image_borders(img, crop_ratio=1):
+    """Masks the outer portion of the image with black pixels based on the given crop ratio."""
+    h, w = img.shape[:2]
+    crop_margin_w = int(w * (1 - crop_ratio) / 2)
+    crop_margin_h = int(h * (1 - crop_ratio) / 2)
 
-a = 9.81 / (a_star / 2 - 1)
-# Create grid for contour plot
-p_grid, f_grid = np.meshgrid(
-    np.linspace(min(pressure), max(pressure), 100),
-    np.linspace(min(fill_height), max(fill_height), 100),
-)
+    masked_img = np.zeros_like(img)
+    masked_img[crop_margin_h:h - crop_margin_h, crop_margin_w:w - crop_margin_w] = \
+        img[crop_margin_h:h - crop_margin_h, crop_margin_w:w - crop_margin_w]
 
-a_grid = griddata((pressure, fill_height), a, (p_grid, f_grid), method="cubic")
+    return masked_img
 
-# %%
-# Create contour plot
-# Plotting parameters
-plt.rc("text", usetex=True)
-plt.rc("font", family="serif", size=14)
-plt.rc("lines", linewidth=2)
+# ====== CONFIGURATION ======
+file_path = r'C:\Users\niloy\Desktop\Experiments\05022025\20250502_142543\20250502_142543000001.bmp'  # <- Replace this with your image path
+crop_ratio = 0.95  # <- Adjust the crop ratio (0 to 1)
 
-plt.figure(figsize=(10, 5))
-contour = plt.contourf(p_grid, f_grid, a_grid, levels=100, cmap="winter")
-plt.scatter(pressure, fill_height, color="r")
-plt.colorbar(contour, label="$a$ [m/s$^2$]")
-plt.xlabel("Pressure [PSI]")
-plt.ylabel("Fill Height [mm]")
-plt.savefig(
-    r"C:\Users\niloy\Google Drive\School Stuff\M.SC Mechanical Engineering\01 - Fluid Dynamics Lab\03 - PDA\01 - 2D Surface Perturbations\Results\a.pdf"
-)
+# ====== LOAD AND PROCESS ======
+img = cv2.imread(file_path)
+if img is None:
+    raise FileNotFoundError(f"Image not found at {file_path}")
+
+# Convert BGR (OpenCV default) to RGB for matplotlib
+img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+masked_img = mask_image_borders(img_rgb, crop_ratio=crop_ratio)
+
+# ====== DISPLAY ======
+plt.imshow(masked_img)
+plt.title(f"Masked Image (crop_ratio={crop_ratio})")
+plt.axis('off')
 plt.show()
-
-# %%

@@ -3,16 +3,17 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.interpolate import CubicSpline
 
-from calibration import get_scaling
+# from calibration import get_scaling
 
-calibration_grid = r"C:\Users\niloy\Desktop\Experiments\192.168.0.10_C001H001S0004.bmp"
-conversion_factor = get_scaling(calibration_grid, (9, 10))  # mm/pixel
+# calibration_grid = r"C:\Users\niloy\Desktop\Experiments\192.168.0.10_C001H001S0004.bmp"
+# conversion_factor = get_scaling(calibration_grid, (9, 10))  # mm/pixel
 # %%
 experiment_number = "20250407_105735"
-experiment_path = rf"E:\FDL\2D Jet Study Experiments\04072025\{experiment_number}"
 results_path = rf"C:\Users\niloy\Google Drive\School Stuff\M.SC Mechanical Engineering\01 - Fluid Dynamics Lab\03 - PDA\01 - 2D Surface Perturbations\Results\{experiment_number}"
-free_surface_data = rf"{results_path}\free_surface_data.npy"
 
+
+free_surface_data = rf"{results_path}\free_surface_data.npy"
+conversion_factor = rf"{results_path}\conversion_factor.npy"
 
 free_surface_all = np.load(free_surface_data)
 

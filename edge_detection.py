@@ -59,6 +59,7 @@ def detect_edges(
     # Compute frame difference
     frame_diff = cv2.absdiff(f1_processed, f2_processed)
 
+    
     # Edge detection (Canny)
     edges = cv2.Canny(frame_diff, canny_threshold1, canny_threshold2)
 

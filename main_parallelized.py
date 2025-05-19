@@ -14,22 +14,24 @@ import os
 import numpy as np
 
 from calibration import get_scaling, get_transformation_matrix
+from free_surface_animation import create_free_surface_animation
+from obstacle_detection import detect_circles
 from plot_surface_dynamics import plot_surface_dynamics
+from surface_perturbation_growth import analyze_steepness_vs_time
 from tracking_surface import process_frames
 
 # %% Constants
 
-BASE_EXPERIMENT_DIR = r"C:\Users\niloy\Desktop\Experiments\04302025"
+BASE_EXPERIMENT_DIR = r"C:\Users\niloy\Desktop\Experiments\05132025"
 RESULTS_BASE_DIR = r"C:\Users\niloy\Google Drive\School Stuff\M.SC Mechanical Engineering\01 - Fluid Dynamics Lab\03 - PDA\01 - 2D Surface Perturbations\Results"
 CALIBRATION_GRID = (
-    r"C:\Users\niloy\Desktop\Experiments\04302025\192.168.0.10_C001H001S0004.bmp"
+    r"C:\Users\niloy\Desktop\Experiments\05132025\192.168.0.10_C001H001S0001.bmp"
 )
 FPS = 7000
 
 # Get scaling factor from calibration grid
-pattern_size = (9, 10)
+pattern_size = (12, 19)
 conversion_factor = get_scaling(CALIBRATION_GRID, pattern_size)  # mm/pixel
-
 
 def process_experiment(experiment_number):
     """
@@ -52,7 +54,7 @@ def process_experiment(experiment_number):
     )
 
     # Track the free surface
-    edges = process_frames(
+    process_frames(
         experiment_path,
         M_rot,
         output_size,
@@ -74,6 +76,22 @@ def process_experiment(experiment_number):
         FPS=FPS,
     )
 
+    # detect_circles(
+    # experiment_path, save_obstacle_data=True, save_path=results_path, show=False
+    # )
+
+    #analyze_steepness_vs_time(results_path, FPS)
+
+    try: 
+        create_free_surface_animation(
+            npy_file,
+            experiment_path,
+            results_path,
+            fps=20,
+            show_animation=True,
+        )
+    except:
+        pass
     print(f"Finished processing {experiment_number}.")
 
 
