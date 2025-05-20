@@ -1,10 +1,10 @@
-# %% 
+# %%
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.signal import savgol_filter
 
 
-def analyze_steepness_vs_time(results_path, FPS, n_obstacle = 1):
+def analyze_steepness_vs_time(results_path, FPS, n_obstacle=1):
     """
     Computes and plots steepness vs. time for a given experiment.
 
@@ -18,7 +18,6 @@ def analyze_steepness_vs_time(results_path, FPS, n_obstacle = 1):
 
     # Load free surface data
 
-
     free_surface_all = np.load(rf"{results_path}\free_surface_data.npy")
     circle = np.loadtxt(rf"{results_path}\obstacle_data.txt")
     conversion_factor = np.load(rf"{results_path}\conversion_factor.npy")
@@ -27,9 +26,13 @@ def analyze_steepness_vs_time(results_path, FPS, n_obstacle = 1):
 
     # Parameters
     n_frames = free_surface_all.shape[2]
-    span = (np.max(free_surface_all[0, :, 0]) * conversion_factor) / (2*n_obstacle)
+    span = (np.max(free_surface_all[0, :, 0]) * conversion_factor) / (2 * n_obstacle)
 
     s_values = []
+
+    # Prepare array to store critical points per frame:
+    # Columns: [x_left_min, y_left_min, x_central, y_central, x_right_min, y_right_min]
+    critical_points = np.full((3, n_frames, 2), np.nan)  # 3 positions, frames, (x,y)
 
     for frame in range(n_frames):
         x_surface = free_surface_all[0, :, frame] * conversion_factor
@@ -37,7 +40,7 @@ def analyze_steepness_vs_time(results_path, FPS, n_obstacle = 1):
         y_surface = savgol_filter(y_surface, window_length=11, polyorder=5)
 
         idx = np.abs(x_surface - x_circle).argmin()
-        central_height = y_surface[idx]
+        # central_height = y_surface[idx]
 
         # Bounds
         left_mask = (x_surface >= x_circle - span) & (x_surface <= x_circle)
@@ -58,11 +61,32 @@ def analyze_steepness_vs_time(results_path, FPS, n_obstacle = 1):
         x_min_right = x_surface[idx_right]
         y_min_right = y_surface[idx_right]
 
+        # Get the indices for left and right minima on the x_surface
+        x_min_left_idx = np.argmin(np.abs(x_surface - x_min_left))
+        x_min_right_idx = np.argmin(np.abs(x_surface - x_min_right))
+
+        # Ensure left < right
+        i_start = min(x_min_left_idx, x_min_right_idx)
+        i_end = max(x_min_left_idx, x_min_right_idx)
+
+        # Get the max height and corresponding x
+        max_segment = y_surface[i_start : i_end + 1]
+        max_idx_local = np.argmax(max_segment)
+        max_height = max_segment[max_idx_local]
+        x_max_height = x_surface[i_start + max_idx_local]
+
+        # Save the central point as the max point between minima
+        critical_points[1, frame, :] = [x_max_height, max_height]
         # Compute steepness
-        h = central_height - (y_min_right + y_min_left) / 2
+        h = max_height - ((y_min_right + y_min_left) / 2)
         w = abs(x_min_left - x_min_right)
         s = h / w
         s_values.append(s)
+
+        # Save into the array with shape (3, n_frames, 2)
+        critical_points[0, frame, :] = [x_min_left, y_min_left]  # left minima
+        critical_points[1, frame, :] = [x_max_height, max_height]  # central point
+        critical_points[2, frame, :] = [x_min_right, y_min_right]  # right minima
 
     # Plotting
     frames = np.arange(n_frames)
@@ -72,7 +96,7 @@ def analyze_steepness_vs_time(results_path, FPS, n_obstacle = 1):
 
     # Compute RMSE
     valid_mask = ~np.isnan(s_values)
-    rmse = np.sqrt((s_values[valid_mask] - s_smooth[valid_mask])**2)
+    rmse = np.sqrt((s_values[valid_mask] - s_smooth[valid_mask]) ** 2)
 
     # RMSE envelope (for plotting as fill)
     rmse_pad = np.zeros_like(s_smooth)
@@ -81,30 +105,38 @@ def analyze_steepness_vs_time(results_path, FPS, n_obstacle = 1):
     upper = s_smooth + rmse_pad
     lower = s_smooth - rmse_pad
 
-    np.save(f"{results_path}/steepness_data.npy", np.array([s_smooth, upper,lower]))
-    
+    np.save(f"{results_path}/steepness_data.npy", np.array([s_smooth, upper, lower]))
+    np.save(f"{results_path}/steepness_critical_points.npy", critical_points)
     plt.rc("text", usetex=True)
     plt.rc("font", family="serif", size=14)
     plt.rc("lines", linewidth=2)
     plt.rc("axes", grid=False)
 
     plt.figure(figsize=(10, 4))
-    plt.plot(time, s_smooth, label='Steepness $s$', color='blue')
-    plt.fill_between(time, lower, upper, color='blue', alpha=0.4, label='RMSE')
-    plt.hlines(0.2, 0, np.max(time), linestyles="--", colors="k", label=r'Jet Threshold $s_{\mathrm{br}} = 0.2$')
-    plt.xlabel('Time [s]')
-    plt.ylabel('Steepness $s$')
-    plt.title('Steepness vs. Time')
+    plt.plot(time, s_smooth, label="Steepness $s$", color="blue")
+    plt.fill_between(time, lower, upper, color="blue", alpha=0.4, label="RMSE")
+    plt.hlines(
+        0.2,
+        0,
+        np.max(time),
+        linestyles="--",
+        colors="k",
+        label=r"Jet Threshold $s_{\mathrm{br}} = 0.2$",
+    )
+    plt.xlabel("Time [s]")
+    plt.ylabel("Steepness $s$")
+    plt.title("Steepness vs. Time")
     plt.grid(True)
     plt.legend()
     plt.tight_layout()
     plt.savefig(
-            rf"{results_path}\steepness_plot.pdf",
-            dpi=300,
-            format="pdf",
-            bbox_inches="tight",
-        )
+        rf"{results_path}\steepness_plot.pdf",
+        dpi=300,
+        format="pdf",
+        bbox_inches="tight",
+    )
     plt.close()
+
 
 # %%
 
@@ -197,7 +229,7 @@ def analyze_steepness_vs_time(results_path, FPS, n_obstacle = 1):
 # plt.show()
 
 # %%
-# # %% 
+# # %%
 
 # experiment_number = "20250430_125933"
 # experiment_path = rf"E:\FDL\2D Jet Study Experiments\04302025\{experiment_number}"

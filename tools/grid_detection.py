@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Load the image
-image_path = r"C:\Users\niloy\Desktop\Experiments\05132025\192.168.0.10_C001H001S0001.bmp"
+image_path = r"E:\FDL\2D Jet Study Experiments\05162025\192.168.0.10_C001H001S0003.bmp"
 
 
 image = cv2.imread(image_path)
@@ -34,6 +34,7 @@ dist = (max(corners[:, :, 1]).item() - min(corners[:, :, 1]).item()) / pattern_s
 scaling = 5 / dist
 print("Scaling is ", scaling)
 
+
 def get_transformation_matrix(image_path, pattern_size):
     """
     Detects a checkerboard grid and returns the rotation matrix that straightens the grid.
@@ -47,7 +48,7 @@ def get_transformation_matrix(image_path, pattern_size):
     img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
     if img is None:
         raise FileNotFoundError(f"Image not found at: {image_path}")
-    
+
     ret, corners = cv2.findChessboardCorners(img, pattern_size, None)
     if not ret:
         raise ValueError("Checkerboard not detected.")
@@ -70,13 +71,14 @@ def get_transformation_matrix(image_path, pattern_size):
     # Image center for rotation
     h, w = img.shape[:2]
     center = (w // 2, h // 2)
-    print(min(-angle_deg, 180-angle_deg, type = abs))
+    print(min(-angle_deg, 180 - angle_deg, type=abs))
     # Calculate the matrix to rotate image to upright (angle -> 0)
-    M_rot = cv2.getRotationMatrix2D(center, min(-angle_deg, 180-angle_deg), 1.0)
+    M_rot = cv2.getRotationMatrix2D(center, min(-angle_deg, 180 - angle_deg), 1.0)
 
     return M_rot, (w, h), angle_deg, corners
 
-pattern_size = (12,21)
+
+pattern_size = (12, 21)
 M_rot, (w, h), angle, corners = get_transformation_matrix(image_path, pattern_size)
 rotated_img = cv2.warpAffine(cv2.imread(image_path), M_rot, (w, h))
 cv2.imshow("Straightened", rotated_img)

@@ -15,23 +15,22 @@ import numpy as np
 
 from calibration import get_scaling, get_transformation_matrix
 from free_surface_animation import create_free_surface_animation
-from obstacle_detection import detect_circles
 from plot_surface_dynamics import plot_surface_dynamics
-from surface_perturbation_growth import analyze_steepness_vs_time
 from tracking_surface import process_frames
 
 # %% Constants
 
-BASE_EXPERIMENT_DIR = r"C:\Users\niloy\Desktop\Experiments\05132025"
+BASE_EXPERIMENT_DIR = r"E:\FDL\2D Jet Study Experiments\05162025"
 RESULTS_BASE_DIR = r"C:\Users\niloy\Google Drive\School Stuff\M.SC Mechanical Engineering\01 - Fluid Dynamics Lab\03 - PDA\01 - 2D Surface Perturbations\Results"
 CALIBRATION_GRID = (
-    r"C:\Users\niloy\Desktop\Experiments\05132025\192.168.0.10_C001H001S0001.bmp"
+    r"E:\FDL\2D Jet Study Experiments\05162025\192.168.0.10_C001H001S0003.bmp"
 )
 FPS = 7000
 
 # Get scaling factor from calibration grid
 pattern_size = (12, 19)
 conversion_factor = get_scaling(CALIBRATION_GRID, pattern_size)  # mm/pixel
+
 
 def process_experiment(experiment_number):
     """
@@ -41,7 +40,7 @@ def process_experiment(experiment_number):
     """
     experiment_path = os.path.join(BASE_EXPERIMENT_DIR, experiment_number)
     results_path = os.path.join(RESULTS_BASE_DIR, experiment_number)
-    
+
     # Ensure results directory exists
     os.makedirs(results_path, exist_ok=True)
     np.save(rf"{results_path}\conversion_factor.npy", conversion_factor)
@@ -80,9 +79,9 @@ def process_experiment(experiment_number):
     # experiment_path, save_obstacle_data=True, save_path=results_path, show=False
     # )
 
-    #analyze_steepness_vs_time(results_path, FPS)
+    # analyze_steepness_vs_time(results_path, FPS)
 
-    try: 
+    try:
         create_free_surface_animation(
             npy_file,
             experiment_path,
