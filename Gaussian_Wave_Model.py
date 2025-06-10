@@ -85,7 +85,7 @@ def plot_multiple_wave(ax, x, m, std, n_obstacles, line_color, label, fill=True,
 # Plot multiple Gaussian wave
 x = np.linspace(-100, 100, 1000)
 sig_0 = 1
-m = 14.4
+m = 32
 n_obstacles = 11
 superposed0 = multi_wave(x, m, sig_0, n_obstacles)
 s0 = compute_steepness(x,superposed0)

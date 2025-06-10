@@ -42,102 +42,93 @@ plt.legend()
 
 plt.tight_layout()
 plt.show()
-
 # %%
-
 import matplotlib.pyplot as plt
 import numpy as np
 
 # Parameters
-a = 80  # m/s^2
-b = 0.01  # m
-k = 1.0  # adjustable
-t = np.linspace(0.001, 0.05, 500)
-
-# Compute Gamma*
-Gamma_star = 3 / (1 + (a * t**2) / (4 * k) + (b**2) / (4 * k * a * t**2))
-
-# Plot
-plt.plot(t, Gamma_star, label=r"$\Gamma^*(t)$")
-plt.axhline(3, color="gray", linestyle="--", label="Asymptote at 3")
-plt.xlabel("Time (s)")
-plt.ylabel(r"$\Gamma^*(t)$")
-plt.title("Asymptotically Saturating $\Gamma^*(t)$")
-plt.grid(True)
-plt.legend()
-plt.tight_layout()
-plt.show()
-
-# %%
-
-import matplotlib.pyplot as plt
-import numpy as np
-
-# Parameters
-Gamma = 1.0  # Vortex strength (positive for right vortex, negative for left)
-b = 0.01  # Distance between vortices (m)
-U_inf = 10  # Background flow velocity (m/s)
+t = 0.02
+Gamma = a**2*t**3    # Vortex strength (positive for right vortex, negative for left)
+b = 0.01       # Distance between vortices (m)
+U_inf = a*t     # Background flow velocity (m/s)
+clip_speed = 5  # Maximum velocity to display (m/s)
 
 # Vortex positions
-x1, y1 = -b / 2, 0  # Left vortex (negative circulation)
-x2, y2 = +b / 2, 0  # Right vortex (positive circulation)
+x1, y1 = -b / 2, 0
+x2, y2 = +b / 2, 0
 
-
-def velocity_at(x, y):
-    """
-    Returns the velocity vector (u, v) at point (x, y) due to:
-    - Two point vortices
-    - Uniform flow in +y direction
-    """
-    # Left vortex (-Gamma)
-    r1_sq = (x - x1) ** 2 + (y - y1) ** 2
-    u1 = (Gamma / (2 * np.pi)) * (y - y1) / r1_sq
-    v1 = -(Gamma / (2 * np.pi)) * (x - x1) / r1_sq
-
-    # Right vortex (+Gamma)
-    r2_sq = (x - x2) ** 2 + (y - y2) ** 2
-    u2 = -(Gamma / (2 * np.pi)) * (y - y2) / r2_sq
-    v2 = (Gamma / (2 * np.pi)) * (x - x2) / r2_sq
-
-    # Uniform flow
-    u_uniform = 0
-    v_uniform = U_inf
-
-    # Total velocity
-    u = u1 + u2 + u_uniform
-    v = v1 + v2 + v_uniform
-    return u, v
-
-
-# Generate a grid for streamlines
+# Grid
 x = np.linspace(-0.05, 0.05, 300)
 y = np.linspace(-0.05, 0.05, 300)
 X, Y = np.meshgrid(x, y)
 
-# Compute velocity field
+# Velocity field and magnitude
 U = np.zeros_like(X)
 V = np.zeros_like(Y)
+Speed = np.zeros_like(X)
 
+# Compute velocity components and magnitude
 for i in range(X.shape[0]):
     for j in range(X.shape[1]):
-        u, v = velocity_at(X[i, j], Y[i, j])
+        x_ = X[i, j]
+        y_ = Y[i, j]
+
+        # Velocity from both vortices
+        r1_sq = (x_ - x1)**2 + (y_ - y1)**2
+        r2_sq = (x_ - x2)**2 + (y_ - y2)**2
+
+        u1 = (Gamma / (2 * np.pi)) * (y_ - y1) / r1_sq
+        v1 = -(Gamma / (2 * np.pi)) * (x_ - x1) / r1_sq
+        u2 = -(Gamma / (2 * np.pi)) * (y_ - y2) / r2_sq
+        v2 = (Gamma / (2 * np.pi)) * (x_ - x2) / r2_sq
+
+        u = u1 + u2
+        v = v1 + v2 + U_inf
+
         U[i, j] = u
         V[i, j] = v
+        Speed[i, j] = np.sqrt(u**2 + v**2)
 
-# Compute streamfunction numerically
+# Clip velocity magnitude
+Speed = np.clip(Speed, 0, clip_speed)
+
+# Plotting
 fig, ax = plt.subplots(figsize=(8, 6))
-strm = ax.streamplot(X, Y, U, V, density=2, linewidth=1, arrowsize=1, arrowstyle="->")
-ax.plot([x1, x2], [y1, y2], "ro", label="Vortices")
+
+# Filled contour plot of speed
+contour = ax.contourf(X, Y, Speed, levels=np.linspace(0, clip_speed, 100), cmap="Blues", extend="max")
+
+# Streamlines
+ax.streamplot(X, Y, U, V, density=1.5, color="w", linewidth=0.25, arrowsize=0.75)
+
+
+# Vortex positions
+ax.plot([x1, x2], [y1, y2], "wo", label="Vortices")
+
+# Colorbar
+cbar = plt.colorbar(contour, ax=ax)
+cbar.set_label("Velocity Magnitude (m/s)")
+cbar.ax.set_yticks([0, 1, 2, 3, 4])
+
+# Labels and formatting
 ax.set_aspect("equal")
 ax.set_xlabel("x (m)")
 ax.set_ylabel("y (m)")
-ax.set_title("Streamlines of Two Vortices with Uniform +y Flow")
-ax.grid(True)
 ax.legend()
+ax.grid(True)
 plt.tight_layout()
 plt.show()
 
-# Example: Get velocity at (0, s)
-s = 0.02  # height above vortices
+# Velocity at (0, s)
+def velocity_at(x, y):
+    r1_sq = (x - x1)**2 + (y - y1)**2
+    r2_sq = (x - x2)**2 + (y - y2)**2
+    u1 = (Gamma / (2 * np.pi)) * (y - y1) / r1_sq
+    v1 = -(Gamma / (2 * np.pi)) * (x - x1) / r1_sq
+    u2 = -(Gamma / (2 * np.pi)) * (y - y2) / r2_sq
+    v2 = (Gamma / (2 * np.pi)) * (x - x2) / r2_sq
+    return u1 + u2, v1 + v2 + U_inf
+
+s = 0.02
 u_s, v_s = velocity_at(0, s)
-print(f"Velocity at (0, {s:.3f} m): u = {u_s:.6f} m/s, v = {v_s:.6f} m/s")
+
