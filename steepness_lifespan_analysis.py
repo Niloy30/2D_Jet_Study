@@ -61,7 +61,6 @@ plt.xlabel("$t$ [s]")
 plt.ylabel("Steepness $s$")
 
 plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left")
-plt.grid(True, linestyle="--", alpha=0.5)
 plt.xlim(0, 0.05)
 plt.ylim(0, 0.45)
 plt.tight_layout()
